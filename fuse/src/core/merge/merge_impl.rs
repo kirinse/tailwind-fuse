@@ -1,9 +1,9 @@
 use std::collections::HashSet;
 
 use crate::ast::AstStyle;
+use crate::core::merge::get_collisions::get_collisions;
 
 use super::{CollisionIdFn, GetCollisionsFn, MergeOptions};
-use crate::core::merge::get_collisions::get_collisions;
 
 /// Merges all the Tailwind classes, resolving conflicts.
 /// Can supply custom options, collision_id_fn and collisions_fn.
@@ -45,7 +45,7 @@ pub fn tw_merge_override(
                     collision_styles.insert(collision);
                 }
                 None => {
-                    #[cfg(debug)]
+                    #[cfg(feature = "debug")]
                     println!("No Instance found: {style:?} {error:?}");
                     let _ = error;
                 }
