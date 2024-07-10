@@ -16,7 +16,7 @@
 //!
 //! ## Installation
 //!
-//! Variants requires the `variant` feature to be enabled.
+//! Variants require the `variant` feature to be enabled.
 //!
 //! #### With variant
 //! ```bash
@@ -261,52 +261,17 @@
 //! ```
 //!
 
-pub use crate::core::merge;
+#[cfg(feature = "variant")]
+pub use variant::*;
+
 pub use crate::core::*;
+pub use crate::core::merge;
 
 mod ast;
 mod core;
 
 #[cfg(feature = "variant")]
-pub use variant::*;
-
-#[cfg(feature = "variant")]
 mod variant {
-    /// Used to Fuse Tailwind Classes together.
-    pub trait TailwindFuse {
-        /// Strings are not guaranteed to be single class nor free of whitespace.
-        fn fuse_classes(&self, class: &[&str]) -> String;
-    }
-
-    /// Will merge Tailwind classes and handle conflicts using [`crate::merge::tw_merge_slice`]
-    pub struct TailwindMerge;
-
-    impl TailwindFuse for TailwindMerge {
-        fn fuse_classes(&self, class: &[&str]) -> String {
-            crate::merge::tw_merge_slice(class)
-        }
-    }
-
-    /// Will simply join Tailwind classes together without handling conflicts
-    pub struct TailwindJoin;
-
-    impl TailwindFuse for TailwindJoin {
-        fn fuse_classes(&self, class: &[&str]) -> String {
-            class
-                .iter()
-                .flat_map(|s| s.split_whitespace())
-                .map(|s| s.trim())
-                .filter(|s| !s.is_empty())
-                .fold(String::new(), |mut acc, s| {
-                    if !acc.is_empty() {
-                        acc.push(' ');
-                    }
-                    acc.push_str(s);
-                    acc
-                })
-        }
-    }
-
     /// Derives a class for use with Tailwind CSS in Rust components.
     ///
     /// Allows building components with first-class support for Tailwind.
@@ -356,9 +321,48 @@ mod variant {
     /// let btn_variant = Btn::builder().color(BtnColor::Red).to_class();
     /// assert_eq!(btn_variant, "flex h-9 px-4 py-2 bg-red-500 text-red-100");
     /// ```
-    ///
     pub use tailwind_fuse_macro::TwClass;
-
+    /// Derives a class for use with Tailwind CSS in Rust components.
+    ///
+    /// Allows building components with first-class support for Tailwind.
+    ///
+    /// Defaults to using [`crate::tw_merge()`] to resolve conflicts.
+    ///
+    /// Resolves conflicts using the following merge order:
+    /// - [`TwThemeClass`] base class
+    /// - Override class with `with_class`
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use tailwind_fuse::*;
+    ///
+    /// #[derive(TwThemeClass)]
+    /// #[tw(theme(class = "flex"))]
+    /// #[tw(theme(name = "default", class = "flex-col items-center"))]
+    /// struct Btn {
+    ///     btn_size: BtnSize,
+    /// }
+    ///
+    /// #[derive(TwThemeVariant)]
+    /// enum BtnSize {
+    ///     #[tw(default)]
+    ///     #[tw(theme(class = "h-9"))]
+    ///     #[tw(theme(name = "default", class = "px-4"))]
+    ///     Default,
+    ///     #[tw(theme(class = "h-8"))]
+    ///     #[tw(theme(name = "default", class = "text-xs"))]
+    ///     Sm,
+    ///     #[tw(theme(class = "h-10"))]
+    ///     #[tw(theme(name = "default", class = "rounded-lg"))]
+    ///     Lg,
+    /// }
+    ///
+    /// let btn = BtnBuilder::default().btn_size(BtnSize::Lg).build();
+    /// assert_eq!("flex-col items-center rounded-lg", btn.to_class(Some("default")));
+    /// assert_eq!("flex h-10", btn.to_class(None::<&str>))
+    /// ```
+    pub use tailwind_fuse_macro::TwThemeClass;
     /// Represents a customizable property (variant) of a UI element.
     /// Each variant must be an enum with a default case.
     ///
@@ -382,8 +386,72 @@ mod variant {
     /// assert_eq!("hover:brightness-50 bg-blue-500 text-blue-100", BtnColor::Default.as_class());
     /// assert_eq!("hover:brightness-50 bg-red-500 text-red-100", BtnColor::Red.as_class());
     /// ```
+    pub use tailwind_fuse_macro::TwThemeVariant;
+    /// Represents a customizable property (variant) of a UI element.
+    /// Each variant must be an enum with a default case.
     ///
+    /// Use `.to_class()` to get the class for the variant and `.with_class()` to append a class.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use tailwind_fuse::*;
+    ///
+    /// #[derive(TwThemeVariant)]
+    /// #[tw(theme(class = "text-gray-100"))]
+    /// #[tw(theme(name = "default", class = "text-red-500"))]
+    /// enum BtnSize {
+    ///     #[tw(default)]
+    ///     #[tw(theme(class = "h-9"))]
+    ///     #[tw(theme(name = "default", class = "px-4"))]
+    ///     Default,
+    ///     #[tw(theme(class = "h-8"))]
+    ///     #[tw(theme(name = "default", class = "text-xs"))]
+    ///     Sm,
+    ///     #[tw(theme(class = "h-10"))]
+    ///     #[tw(theme(name = "default", class = "rounded-lg"))]
+    ///     Lg,
+    /// }
+    ///
+    /// assert_eq!("text-gray-100 h-9", BtnSize::Default.as_class("base"));
+    /// assert_eq!("text-red-500 px-4", BtnSize::Default.as_class("default"));
+    /// ```
     pub use tailwind_fuse_macro::TwVariant;
+
+    /// Used to Fuse Tailwind Classes together.
+    pub trait TailwindFuse {
+        /// Strings are not guaranteed to be single class nor free of whitespace.
+        fn fuse_classes(&self, class: &[&str]) -> String;
+    }
+
+    /// Will merge Tailwind classes and handle conflicts using [`crate::merge::tw_merge_slice`]
+    pub struct TailwindMerge;
+
+    impl TailwindFuse for TailwindMerge {
+        fn fuse_classes(&self, class: &[&str]) -> String {
+            crate::merge::tw_merge_slice(class)
+        }
+    }
+
+    /// Will simply join Tailwind classes together without handling conflicts
+    pub struct TailwindJoin;
+
+    impl TailwindFuse for TailwindJoin {
+        fn fuse_classes(&self, class: &[&str]) -> String {
+            class
+                .iter()
+                .flat_map(|s| s.split_whitespace())
+                .map(|s| s.trim())
+                .filter(|s| !s.is_empty())
+                .fold(String::new(), |mut acc, s| {
+                    if !acc.is_empty() {
+                        acc.push(' ');
+                    }
+                    acc.push_str(s);
+                    acc
+                })
+        }
+    }
 
     /// A trait to convert a type into a Tailwind class.
     /// Implemented automatically for usages of [`TwClass`] and [`TwVariant`].
@@ -392,6 +460,21 @@ mod variant {
         fn to_class(&self) -> String;
         /// Append to the class (with override precedence) and return the new class.
         fn with_class(&self, class: impl AsRef<str>) -> String;
+    }
+
+    /// Used to extract a &str from a type
+    pub trait AsTailwindThemeClass {
+        /// Extract a Tailwind class
+        fn as_class(&self, theme: impl AsRef<str>) -> &str;
+    }
+
+    /// A trait to convert a type into a Tailwind class.
+    /// Implemented automatically for usages of [`TwThemeClass`] and [`TwThemeVariant`].
+    pub trait IntoTailwindThemeClass {
+        /// Convert the type into a Tailwind class.
+        fn to_class(&self, theme: Option<impl AsRef<str>>) -> String;
+        /// Append to the class (with override precedence) and return the new class.
+        fn with_class(&self, theme: Option<impl AsRef<str>>, class: impl AsRef<str>) -> String;
     }
 
     /// Converts a type into it's builder.
