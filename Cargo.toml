@@ -2,3 +2,9 @@
 exclude = ["example"]
 members = ["fuse", "variant-macro"]
 resolver = "2"
+
+[workspace.package]
+edition = "2021"
+version = "0.3.0"
+license = "MIT"
+repository = "https://github.com/gaucho-labs/tailwind-fuse"
