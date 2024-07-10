@@ -1,2 +1,8 @@
 /target
 .DS_Store
+
+.idea
+*.iml
+
+/Cargo.lock
+/fuse/Cargo.lock
