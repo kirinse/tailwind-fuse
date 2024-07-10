@@ -22,7 +22,7 @@ name = "merge"
 harness = false
 
 [features]
-variant = ["tailwind_fuse_macro"]
+variant = ["dep:tailwind_fuse_macro"]
 debug = []
 
 [package.metadata.docs.rs]
