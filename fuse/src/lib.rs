@@ -373,30 +373,6 @@ mod variant {
     /// ```rust
     /// use tailwind_fuse::*;
     ///
-    /// #[derive(TwVariant, Debug)]
-    /// // Optional base class
-    /// #[tw(class = "hover:brightness-50")]
-    /// enum BtnColor {
-    ///     #[tw(default, class = "bg-blue-500 text-blue-100")]
-    ///     Default,
-    ///     #[tw(class = "bg-red-500 text-red-100")]
-    ///     Red,
-    /// }
-    ///
-    /// assert_eq!("hover:brightness-50 bg-blue-500 text-blue-100", BtnColor::Default.as_class());
-    /// assert_eq!("hover:brightness-50 bg-red-500 text-red-100", BtnColor::Red.as_class());
-    /// ```
-    pub use tailwind_fuse_macro::TwThemeVariant;
-    /// Represents a customizable property (variant) of a UI element.
-    /// Each variant must be an enum with a default case.
-    ///
-    /// Use `.to_class()` to get the class for the variant and `.with_class()` to append a class.
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use tailwind_fuse::*;
-    ///
     /// #[derive(TwThemeVariant)]
     /// #[tw(theme(class = "text-gray-100"))]
     /// #[tw(theme(name = "default", class = "text-red-500"))]
@@ -415,6 +391,30 @@ mod variant {
     ///
     /// assert_eq!("text-gray-100 h-9", BtnSize::Default.as_class("base"));
     /// assert_eq!("text-red-500 px-4", BtnSize::Default.as_class("default"));
+    /// ```
+    pub use tailwind_fuse_macro::TwThemeVariant;
+    /// Represents a customizable property (variant) of a UI element.
+    /// Each variant must be an enum with a default case.
+    ///
+    /// Use `.to_class()` to get the class for the variant and `.with_class()` to append a class.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use tailwind_fuse::*;
+    ///
+    /// #[derive(TwVariant, Debug)]
+    /// // Optional base class
+    /// #[tw(class = "hover:brightness-50")]
+    /// enum BtnColor {
+    ///     #[tw(default, class = "bg-blue-500 text-blue-100")]
+    ///     Default,
+    ///     #[tw(class = "bg-red-500 text-red-100")]
+    ///     Red,
+    /// }
+    ///
+    /// assert_eq!("hover:brightness-50 bg-blue-500 text-blue-100", BtnColor::Default.as_class());
+    /// assert_eq!("hover:brightness-50 bg-red-500 text-red-100", BtnColor::Red.as_class());
     /// ```
     pub use tailwind_fuse_macro::TwVariant;
 
