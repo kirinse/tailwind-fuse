@@ -23,7 +23,7 @@ pub struct TwThemeVariantOption {
 pub struct TwTheme {
     /// If no name is provided or the value of name is specified as base,
     /// then this class means that all subject items are shared.
-    pub name: Option<syn::LitStr>,
+    pub name: Option<syn::Ident>,
     pub class: Option<syn::LitStr>,
 }
 

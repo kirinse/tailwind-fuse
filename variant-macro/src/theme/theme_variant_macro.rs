@@ -150,7 +150,10 @@ where
         HashMap::<LitStr, (String, Ident)>::new(),
         |mut container, item| {
             let value = item.class.as_ref().map(LitStr::value).unwrap_or_default();
-            let key = item.name.unwrap_or(LitStr::new("base", Span::call_site()));
+            let key = match item.name {
+                Some(name) => LitStr::new(&name.to_string(), name.span()),
+                None => LitStr::new("base", Span::call_site()),
+            };
             let ident = Ident::new(
                 &format!(
                     "{}_{}_{}",
