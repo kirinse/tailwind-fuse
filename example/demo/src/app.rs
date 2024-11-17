@@ -165,7 +165,7 @@ fn Header() -> impl IntoView {
                 }
             }>
                 <Show
-                    when=Signal::derive(move || current_theme.get() == Theme::Light)
+                    when=move || Signal::derive(move || current_theme.get() == Theme::Light).get()
                     fallback=|| {
                         view! {
                             <svg
